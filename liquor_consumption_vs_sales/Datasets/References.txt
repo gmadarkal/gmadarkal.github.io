@@ -1,0 +1,10 @@
+References:
+
+Accident Reports:
+https://www.nhtsa.gov/file-downloads?p=nhtsa/downloads/FARS/
+
+Alcohol Consumption:
+https://www.openicpsr.org/openicpsr/project/105583/version/V5/view?path=/openicpsr/105583/fcr:versions/V5/apparent_per_capita_alcohol_consumption_1977_2018.csv&type=file
+
+Census Data:
+https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html#par_textimage_1873399417

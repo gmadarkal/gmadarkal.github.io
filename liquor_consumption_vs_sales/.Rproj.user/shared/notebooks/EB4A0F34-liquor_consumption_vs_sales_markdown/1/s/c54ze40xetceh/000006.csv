@@ -1,0 +1,7 @@
+"0",""
+"0","# GET THE POPULATION DATA FROM YEAR 2015 TO 2019 SO THAT WE CAN CALCULATE THE GALLONS ON ALCOHOL CONSUMED/SOLD STATE WISE"
+"0","population_state_year <- read.csv('./Datasets/population_statewise_2014-2018.csv', check.names = FALSE)[, c(""Name"", ""2014"", ""2015"", '2016', ""2017"", ""2018"")]"
+"0",""
+"0","# GET THE ALCOHOL CONSUMED DATA, WHICH HAS ETHANOL CONSUMED PER CAPITA"
+"0","liquor_sales_raw <- read.csv('./Datasets/apparent_per_capita_liquor_sales_1977_2018.csv')"
+"0",""

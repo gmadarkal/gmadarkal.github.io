@@ -1,0 +1,172 @@
+---
+title: "Liquor Sales VS DUI Accidents"
+author: "Gaurav Madarkal"
+date: "8/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Liquor Sales Vs DUI Accidents
+
+## Installing required dependencies
+
+```{r}
+library(dplyr)
+library(usmap)
+library(ggplot2)
+```
+
+## Loading Data - Accident reports - Year wise
+
+```{r}
+
+# INDIVIDUAL YEAR DATA
+
+accidents_2014 <- read.csv('./Datasets/accident_2014.csv')[ ,c('STATE', 'YEAR', 'DRUNK_DR')]
+accidents_2015 <- read.csv('./Datasets/accident_2015.csv')[ ,c('STATE', 'YEAR', 'DRUNK_DR')]
+accidents_2016 <- read.csv('./Datasets/accident_2016.csv')[ ,c('STATE', 'YEAR', 'DRUNK_DR')]
+accidents_2017 <- read.csv('./Datasets/accident_2017.csv')[ ,c('STATE', 'YEAR', 'DRUNK_DR')]
+accidents_2018 <- read.csv('./Datasets/accident_2018.csv')[ ,c('STATE', 'YEAR', 'DRUNK_DR')]
+#accidents_2019 <- read.csv('./Datasets/accident_2019.csv')[ ,c('STATE', 'YEAR', 'DRUNK_DR')]
+
+# STATE NUMBERS
+state_numbers_data <- read.csv('./Datasets/state_names_numbers.csv')
+
+```
+
+## Loading Data - Census - Year wise
+
+```{r}
+
+# GET THE POPULATION DATA FROM YEAR 2015 TO 2019 SO THAT WE CAN CALCULATE THE GALLONS ON ALCOHOL CONSUMED/SOLD STATE WISE
+population_state_year <- read.csv('./Datasets/population_statewise_2014-2018.csv', check.names = FALSE)[, c("Name", "2014", "2015", '2016', "2017", "2018")]
+
+# GET THE ALCOHOL CONSUMED DATA, WHICH HAS ETHANOL CONSUMED PER CAPITA
+liquor_sales_raw <- read.csv('./Datasets/apparent_per_capita_liquor_sales_1977_2018.csv')
+
+```
+
+## Filtering Data and cleaning it
+
+```{r}
+
+# COMBINE ALL REPORTS FROM EACH YEAR
+accidents_all <- rbind(accidents_2014, accidents_2015, accidents_2016, accidents_2017, accidents_2018)
+
+# FILTER ACCIDENTS WHICH ARE DRUNK DRIVE ONLY
+dui_accidents_all <- subset(accidents_all, DRUNK_DR == 1)
+
+# RETRIEVE THE STATENAMES BY JOINING WITH STATE NUMBERS
+accidents_state_wise <- merge(dui_accidents_all, state_numbers_data, all.x = FALSE, all.y = FALSE)
+accidents_state_wise$region <- tolower(accidents_state_wise$STATE_NAME)
+
+# FILTER THE REQUIRED YEARS AND COLUMNS
+liquor_sales_2014_2018 <- subset(liquor_sales_raw, year %in% c("2014", "2015", "2016", "2017", "2018"))[, c('state', 'year', 'ethanol_all_drinks_gallons_per_capita')]
+```
+
+## Calculating Overall Alcohol Sales per state
+
+```{r}
+# NORMALIZE THE STATE NAMES BY MAKING THEM UPPER CASE
+liquor_sales_2014_2018$region <- tolower(liquor_sales_2014_2018$state)
+
+# NORMALIZE THE STATE NAMES BY MAKING THEM UPPER CASE
+population_state_year$region <- tolower(population_state_year$Name)
+
+# DECLARE ALL THE STATE POPULATION AS 0 INITIALLY
+liquor_sales_2014_2018[, "population"] = 0
+
+# LOOP OVER THE INDIVIDUAL STATE POPULATION AND ADD THE VALUES TO ALCOHOL SALES DATA SET
+# SINCE THE POPULATION DATASET IS IN A MATRIX FORMAT WE NEED TO LOOP OVER EACH ENTRY AND CANNOT AUTOMATICALLY JOIN
+i <- 1
+for (row in 1:nrow(population_state_year)) {
+  if (i < nrow(liquor_sales_2014_2018)) {
+      liquor_sales_2014_2018[i, "population"] = population_state_year[row, "2018"]
+      liquor_sales_2014_2018[i + 1, "population"] = population_state_year[row, "2017"]
+      liquor_sales_2014_2018[i + 2, "population"] = population_state_year[row, "2016"]
+      liquor_sales_2014_2018[i + 3, "population"] = population_state_year[row, "2015"]
+      liquor_sales_2014_2018[i + 4, "population"] = population_state_year[row, "2014"]
+      i <- i + 5
+  }
+}
+# REMOVE COMMAS AND CONVERT THE POPULATION VALUE TO A NUMERIC ONE
+liquor_sales_2014_2018$population <-  as.numeric(gsub(",","",liquor_sales_2014_2018$population))
+
+# MULIPLY THE POPULATION WITH THE PER CAPITA sales WHICH WILL GIVE US THE TOTAL GALLONS A STATE CONSUMED IN THAT YEAR
+liquor_sales_2014_2018$total_gallons <- liquor_sales_2014_2018$ethanol_all_drinks_gallons_per_capita * liquor_sales_2014_2018$population
+```
+
+## Aggregating total DUI accidents for a year for a state
+
+```{r}
+
+accidents_year_vs_state <- setNames(aggregate(accidents_state_wise$DRUNK_DR, by=list(state=accidents_state_wise$STATE_NAME, year=accidents_state_wise$YEAR), FUN=sum), c("state", "year", "occurences"))
+accidents_year_vs_state$fips = fips(accidents_year_vs_state$state)
+map_data <- inner_join(us_map(), accidents_year_vs_state)
+
+### ACCIDENTS USA HEATMAP FOR 2014 ###
+plot_usmap(data = subset(map_data, year=='2014') %>% select(fips, occurences), values="occurences", labels = TRUE) + 
+    scale_fill_continuous(low = "white", high = "red", name = "DUI Accidents 2014", label = scales::comma)
+ggsave('./Plots/dui_accidents_2014.png', last_plot())
+
+### ACCIDENTS USA HEATMAP FOR 2015 ###
+plot_usmap(data = subset(map_data, year=='2015') %>% select(fips, occurences), values="occurences", labels = TRUE) + 
+    scale_fill_continuous(low = "white", high = "red", name = "DUI Accidents 2015", label = scales::comma)
+ggsave('./Plots/dui_accidents_2015.png', last_plot())
+
+### ACCIDENTS USA HEATMAP FOR 2016 ###
+plot_usmap(data = subset(map_data, year=='2016') %>% select(fips, occurences), values="occurences", labels = TRUE) + 
+    scale_fill_continuous(low = "white", high = "red", name = "DUI Accidents 2016", label = scales::comma)
+ggsave('./Plots/dui_accidents_2016.png', last_plot())
+
+### ACCIDENTS USA HEATMAP FOR 2017 ###
+plot_usmap(data = subset(map_data, year=='2017') %>% select(fips, occurences), values="occurences", labels = TRUE) + 
+    scale_fill_continuous(low = "white", high = "red", name = "DUI Accidents 2017", label = scales::comma)
+ggsave('./Plots/dui_accidents_2017.png', last_plot())
+
+### ACCIDENTS USA HEATMAP FOR 2018 ###
+plot_usmap(data = subset(map_data, year=='2018') %>% select(fips, occurences), values="occurences", labels = TRUE) + 
+    scale_fill_continuous(low = "white", high = "red", name = "DUI Accidents 2018", label = scales::comma)
+ggsave('./Plots/dui_accidents_2018.png', last_plot())
+```
+
+## Plotting USA heat map to understand which states have higher and lower amount of alcohol sales
+
+```{r}
+
+liquor_sales_2014_2018$fips = fips(liquor_sales_2014_2018$state)
+map_data <- inner_join(us_map(), liquor_sales_2014_2018)
+
+### ALCOHOL sales FOR YEAR 2014 ###
+plot_usmap(data = subset(map_data, year == "2014") %>% select(fips, total_gallons), values="total_gallons", labels = TRUE) + 
+    scale_fill_continuous(low = "white", high = "blue", name = "Alcohol sales 2014", label = scales::comma)
+ggsave('./Plots/liqour_sales_2014.png', last_plot())
+
+
+### ALCOHOL sales FOR YEAR 2015 ###
+plot_usmap(data = subset(map_data, year == "2015") %>% select(fips, total_gallons), values="total_gallons", labels = TRUE) + 
+    scale_fill_continuous(low = "white", high = "blue", name = "Alcohol sales 2015", label = scales::comma)
+ggsave('./Plots/liqour_sales_2015.png', last_plot())
+
+
+### ALCOHOL sales FOR YEAR 2016 ###
+plot_usmap(data = subset(map_data, year == "2016") %>% select(fips, total_gallons), values="total_gallons", labels = TRUE) + 
+    scale_fill_continuous(low = "white", high = "blue", name = "Alcohol sales 2016", label = scales::comma)
+ggsave('./Plots/liqour_sales_2016.png', last_plot())
+
+
+### ALCOHOL sales FOR YEAR 2017 ###
+plot_usmap(data = subset(map_data, year == "2017") %>% select(fips, total_gallons), values="total_gallons", labels = TRUE) + 
+    scale_fill_continuous(low = "white", high = "blue", name = "Alcohol sales 2017", label = scales::comma)
+ggsave('./Plots/liqour_sales_2017.png', last_plot())
+
+
+### ALCOHOL sales FOR YEAR 2018 ###
+plot_usmap(data = subset(map_data, year == "2018") %>% select(fips, total_gallons), values="total_gallons", labels = TRUE) + 
+    scale_fill_continuous(low = "white", high = "blue", name = "Alcohol sales 2018", label = scales::comma)
+ggsave('./Plots/liqour_sales_2018.png', last_plot())
+
+```
