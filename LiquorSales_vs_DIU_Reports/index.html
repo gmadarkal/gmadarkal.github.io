@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<head?>
+    <title>Liquor Sales vs DUI Reports - Data Analytics Project</title>
+    <style type='text/css'>
+        body {
+            padding: 1em 5em;
+            font-family: sans-serif;
+        }
+        img {
+            width: 30em;
+            height: 30em;
+            margin: 0 2em;
+        }
+        a {
+            text-decoration: none;
+            color: black;
+        }
+        .button {
+            width: 100%;
+            padding: 50px auto;
+            background-color: wheat;
+            border: 1px solid tan;
+            border-radius: 3px;
+            font-size: 2em;
+            font-weight: bold;
+            text-align: center;
+        }
+        .button:hover {
+            background-color: white;
+            cursor: pointer;
+        }
+        h1 {
+            text-align: center;
+            font-weight: bold;
+        }
+        .plot_cmp {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Liquor Sales Vs DUI Accident Reports - Data Analytics</h1>
+    <h2>Introduction</h2>
+    <p>
+        This is a data analytics project written in R language, the goal of this project is to gather Liquor Sales data and the DUI(Driving under Infuence) Accidents data, and try to 
+        find a correlation between the two, do the states which have higher amount of alcohol sales have a higher rate of DUI reports? or are the two completely unrelated?. We can achieve 
+        by understanding the data we can find. The requirements for this project would be to find a dataset which gives us both sales data as well as the DUI reports data. But, unfortunately
+        we are not that lucky, so let start searching the internet to find relevant info so that we can create such a dataset.
+        <br /><br />
+        let choose a timeline, 2014 - 2018, its the perfect timeline because the millenials would have turned 18 or above.
+        Firstly, lets try to gather the liquor sales data, we need to find a dataset that gives us the liquor consumption data.
+        <br /><br />
+        <b>ICPSR</b> - has an open dataset available which provides a per capita alcohol consumption state wise, which is not 100% what we want, but its a step forward.
+        Now we have per capita gallon based data, now we need to find the state wise population for the respective year so that we can find the total gallons consumed by a state in a year.
+        For this lets visit the census website which gives us this info
+        <br /><br />
+        After computation we will have the total alcohol consumed by a state in a year.
+        <br />
+        Finally, we need to gather the DUI accident reports.
+        The <b>NHTSA</b> has datasets for accidents reported for each year.
+        <br /><br />
+        <b>Great, we now have all the data we need to get started.</b>
+        <br /><br />
+    </p>
+    <div class="button">
+        <a href="./liquor_sales_vs_dui_reports_analytics_report.html">View Markdown</a>
+    </div>
+    <h2>Result after running data analysis</h2>
+    <div class="plot_cmp">
+        <h2>Year - 2014</h2>
+        <img src='./Plots/dui_accidents_2014.png' alt='DUI accidents for year 2014' />
+        <img src='./Plots/liqour_sales_2014.png' alt='Liquor sales for year 2014' />
+    </div>
+    <div class="plot_cmp">
+        <h2>Year - 2015</h2>
+        <img src='./Plots/dui_accidents_2015.png' alt='DUI accidents for year 2015' />
+        <img src='./Plots/liqour_sales_2015.png' alt='Liquor sales for year 2015' />
+    </div>
+    <div class="plot_cmp">
+        <h2>Year - 2016</h2>
+        <img src='./Plots/dui_accidents_2016.png' alt='DUI accidents for year 2016' />
+        <img src='./Plots/liqour_sales_2016.png' alt='Liquor sales for year 2016' />
+    </div>
+    <div class="plot_cmp">
+        <h2>Year - 2017</h2>
+        <img src='./Plots/dui_accidents_2017.png' alt='DUI accidents for year 2017' />
+        <img src='./Plots/liqour_sales_2017.png' alt='Liquor sales for year 2017' />
+    </div>
+    <div class="plot_cmp">
+        <h2>Year - 2018</h2>
+        <img src='./Plots/dui_accidents_2018.png' alt='DUI accidents for year 2018' />
+        <img src='./Plots/liqour_sales_2018.png' alt='Liquor sales for year 2018' />
+    </div>
+    <h3>Conclusion</h3>
+    <p>As seen from the maps above we can clearly infer that there is a relationship between the liquor sales and the accident reports, higher the sales in the state more accidents have been reported</p>
+    <h3>Future Implementation</h3>
+    <ol>
+        <li>Include the average age of the population state in the dataset and try to make a relationship between age and the DUI reports</li>
+        <li>That way we can also see if the states with youger population has more reports</li>
+        <li>Also, we can find the timeline of the sales in year and see if the accidents peak during a particular season, like public holidays, festivals etc..</li>
+    </ol>
+    <h3>References</h3>
+    <ol>
+        <li>Accident Reports: https://www.nhtsa.gov/file-downloads?p=nhtsa/downloads/FARS/</li>
+        <li>Alcohol Consumption:
+            https://www.openicpsr.org/openicpsr/project/105583/version/V5/view?path=/openicpsr/105583/fcr:versions/V5/apparent_per_capita_alcohol_consumption_1977_2018.csv&type=file
+        </li>
+        <li>
+Census Data:
+https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html#par_textimage_1873399417
+        </li>
+    </ol>
+</body>
+</html>
